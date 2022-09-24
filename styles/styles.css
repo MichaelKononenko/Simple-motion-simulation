@@ -58,3 +58,15 @@ body {
   height: 30px;
   position: absolute;
 }
+
+/* canvas center */
+.block {
+  display: none;
+  position: absolute;
+  top: 50%;
+  right: 50%;
+  transform: translate(50%, -50%);
+  background-color: aqua;
+  width: 30px;
+  height: 30px;
+}
