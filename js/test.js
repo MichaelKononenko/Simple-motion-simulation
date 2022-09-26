@@ -24,7 +24,7 @@ canva.addEventListener("click", () => {
   newSimple.randomizePosition();
   newSimple.foo();
   newSimple.createBlock();
-  const makeMove = setInterval(() => newSimple.move(), 10);
+  newSimple.setTime();
 });
 canva.addEventListener("contextmenu", (event) => {
   event.preventDefault();
@@ -39,7 +39,7 @@ canva.addEventListener("contextmenu", (event) => {
   newHighLevel.randomizePosition();
   newHighLevel.foo();
   newHighLevel.createBlock();
-  const makeMove = setInterval(() => newHighLevel.move(), 10);
+  newHighLevel.setTime();
 });
 
 //buttons click handling
@@ -60,7 +60,7 @@ function buttonEvent(event) {
       newSimple.randomizePosition();
       newSimple.foo();
       newSimple.createBlock();
-      const makeMoveSimpleBlock = setInterval(() => newSimple.move(), 10);
+      newSimple.setTime();
       break;
     case "high-level-cube":
       id += 1;
@@ -74,7 +74,7 @@ function buttonEvent(event) {
       newHighLevel.randomizePosition();
       newHighLevel.foo();
       newHighLevel.createBlock();
-      const makeMoveHighLevelBlock = setInterval(() => newHighLevel.move(), 10);
+      newHighLevel.setTime();
       break;
     case "about-button":
       backdrop.classList.remove("is-hidden");
@@ -104,6 +104,9 @@ class Block {
     this.yDirection = true;
     this.color = "";
     this.colorSet = [];
+    this.colorId = 0;
+    this.lifes = 0;
+    this.makeMove;
   }
   randomizePosition() {
     console.log(this.randomPosition);
@@ -119,12 +122,15 @@ class Block {
   }
 
   foo() {
-    this.color = this.type === "simple" ? "pink" : "purple";
+    this.color = this.type === "simple" ? "pink" : "indigo";
     if (this.type === "simple") {
-      this.colorSet = ["pink", "aqua", "orange", "yellow"];
+      this.colorSet = ["HotPink", "DeepPink", "MediumVioletRed"];
+      this.lifes = 3;
     } else {
-      this.colorSet = ["purple", "navy", "brown", "teal"];
+      this.colorSet = ["purple", "darkOrchid", "blueViolet", "MediumPurple", "orchid", "plum"];
+      this.lifes = 6;
     }
+
     console.log(this);
     console.log(this.type);
     console.log(this.xPosition);
@@ -133,33 +139,32 @@ class Block {
   }
   createBlock() {
     let symbol = this.type === "simple" ? "S" : "H";
-    const newDiv = `<div id="${this.id}" class="block ${this.type}" style="background-color:${this.color}; top: ${this.newY}px; left:${this.newX}px"><span></span>${symbol}</div>`;
-    canva.insertAdjacentHTML(
-      "beforeend",
-      newDiv
-      // `<div id="${id}" class="simple-block" style="background-color:${color}; top: ${this.newY}px; left:${this.newX}px"></div>`
-    );
-    // canva.innerHTML += `<div id="${id}" class="simple-block" style="background-color:${color}; top: ${this.newY}px; left:${this.newX}px"></div>`;
+    const newDiv = `<div id="${this.id}" class="block ${
+      this.type
+    }" style="background-image: radial-gradient(${this.color}, ${this.colorSet[this.colorId]}, ${
+      this.color
+    }); top: ${this.newY}px; left:${this.newX}px"><span></span>${symbol}</div>`;
+    canva.insertAdjacentHTML("beforeend", newDiv);
   }
   removeBlock() {
     const removedBlock = document.getElementById(`${this.id}`);
     canva.removeChild(removedBlock);
   }
+
   move() {
     this.removeBlock();
     if (this.xDirection) {
       this.newX += 1;
       if (this.newX > canvaWidth - 36) {
         this.xDirection = !this.xDirection;
-        this.color = this.colorSet[0];
+        this.colorId += 1;
       }
     }
     if (!this.xDirection) {
       this.newX -= 1;
       if (this.newX < 0) {
         this.xDirection = !this.xDirection;
-
-        this.color = this.colorSet[1];
+        this.colorId += 1;
       }
     }
 
@@ -167,17 +172,29 @@ class Block {
       this.newY += 1;
       if (this.newY > canvasHeight - 36) {
         this.yDirection = !this.yDirection;
-        this.color = this.colorSet[2];
+        this.colorId += 1;
       }
     }
     if (!this.yDirection) {
       this.newY -= 1;
       if (this.newY < 0) {
         this.yDirection = !this.yDirection;
-        this.color = this.colorSet[3];
+        this.colorId += 1;
       }
     }
+
+    if (this.colorId > this.lifes - 1) {
+      console.log("-1");
+      clearInterval(this.makeMove);
+      return;
+    }
+
     this.createBlock();
+
     // console.log("x = ", this.newX, "y = ", this.newY);
+  }
+
+  setTime() {
+    this.makeMove = setInterval(() => this.move(), 25);
   }
 }
