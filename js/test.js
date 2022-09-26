@@ -14,22 +14,8 @@ canva.addEventListener(
 );
 canva.addEventListener("click", () => {
   id += 1;
-  const newHighLevel = new Block({
-    type: "simple",
-    xPosition: xPosition,
-    yPosition: yPosition,
-    randomPosition: false,
-    id: id,
-  });
-  newHighLevel.randomizePosition();
-  newHighLevel.foo();
-  newHighLevel.createBlock();
-});
-canva.addEventListener("contextmenu", (event) => {
-  event.preventDefault();
-  id += 1;
   const newSimple = new Block({
-    type: "high-level",
+    type: "simple",
     xPosition: xPosition,
     yPosition: yPosition,
     randomPosition: false,
@@ -38,6 +24,22 @@ canva.addEventListener("contextmenu", (event) => {
   newSimple.randomizePosition();
   newSimple.foo();
   newSimple.createBlock();
+  const makeMove = setInterval(() => newSimple.move(), 10);
+});
+canva.addEventListener("contextmenu", (event) => {
+  event.preventDefault();
+  id += 1;
+  const newHighLevel = new Block({
+    type: "high-level",
+    xPosition: xPosition,
+    yPosition: yPosition,
+    randomPosition: false,
+    id: id,
+  });
+  newHighLevel.randomizePosition();
+  newHighLevel.foo();
+  newHighLevel.createBlock();
+  const makeMove = setInterval(() => newHighLevel.move(), 10);
 });
 
 //buttons click handling
@@ -58,6 +60,7 @@ function buttonEvent(event) {
       newSimple.randomizePosition();
       newSimple.foo();
       newSimple.createBlock();
+      const makeMoveSimpleBlock = setInterval(() => newSimple.move(), 10);
       break;
     case "high-level-cube":
       id += 1;
@@ -71,6 +74,7 @@ function buttonEvent(event) {
       newHighLevel.randomizePosition();
       newHighLevel.foo();
       newHighLevel.createBlock();
+      const makeMoveHighLevelBlock = setInterval(() => newHighLevel.move(), 10);
       break;
     case "about-button":
       backdrop.classList.remove("is-hidden");
@@ -86,6 +90,7 @@ const displayWidth = body.offsetWidth;
 const canvaWidth = canva.offsetWidth;
 const canvasHeight = canva.offsetHeight;
 
+console.log(canvaWidth);
 class Block {
   constructor({ type, xPosition, yPosition, id, randomPosition }) {
     this.type = type;
@@ -95,6 +100,8 @@ class Block {
     this.randomPosition = randomPosition;
     this.newX = 0;
     this.newY = 0;
+    this.xDirection = true;
+    this.yDirection = true;
   }
   randomizePosition() {
     console.log(this.randomPosition);
@@ -118,9 +125,46 @@ class Block {
   }
   createBlock() {
     const color = this.type === "simple" ? "pink" : "purple";
+    const newDiv = `<div id="${this.id}" class="simple-block" style="background-color:${color}; top: ${this.newY}px; left:${this.newX}px"></div>`;
     canva.insertAdjacentHTML(
       "beforeend",
-      `<div id="${id}" class="simple-block" style="background-color:${color}; top: ${this.newY}px; left:${this.newX}px"></div>`
+      newDiv
+      // `<div id="${id}" class="simple-block" style="background-color:${color}; top: ${this.newY}px; left:${this.newX}px"></div>`
     );
+    // canva.innerHTML += `<div id="${id}" class="simple-block" style="background-color:${color}; top: ${this.newY}px; left:${this.newX}px"></div>`;
+  }
+  removeBlock() {
+    const removedBlock = document.getElementById(`${this.id}`);
+    canva.removeChild(removedBlock);
+  }
+  move() {
+    this.removeBlock();
+    if (this.xDirection) {
+      this.newX += 1;
+      if (this.newX > canvaWidth - 36) {
+        this.xDirection = !this.xDirection;
+      }
+    }
+    if (!this.xDirection) {
+      this.newX -= 1;
+      if (this.newX < 0) {
+        this.xDirection = !this.xDirection;
+      }
+    }
+
+    if (this.yDirection) {
+      this.newY += 1;
+      if (this.newY > canvasHeight - 36) {
+        this.yDirection = !this.yDirection;
+      }
+    }
+    if (!this.yDirection) {
+      this.newY -= 1;
+      if (this.newY < 0) {
+        this.yDirection = !this.yDirection;
+      }
+    }
+    this.createBlock();
+    console.log("x = ", this.newX, "y = ", this.newY);
   }
 }
