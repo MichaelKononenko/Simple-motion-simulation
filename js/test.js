@@ -12,11 +12,34 @@ canva.addEventListener(
     yPosition = evt.clientY;
   })
 );
-//click handling inside canvas
-canva.addEventListener("click", () => renderBox("simple"));
+canva.addEventListener("click", () => {
+  id += 1;
+  const newSimple = new Block({
+    type: "simple",
+    xPosition: xPosition,
+    yPosition: yPosition,
+    randomPosition: false,
+    id: id,
+  });
+  newSimple.randomizePosition();
+  newSimple.foo();
+  newSimple.createBlock();
+  const makeMove = setInterval(() => newSimple.move(), 10);
+});
 canva.addEventListener("contextmenu", (event) => {
   event.preventDefault();
-  renderBox("high-level");
+  id += 1;
+  const newHighLevel = new Block({
+    type: "high-level",
+    xPosition: xPosition,
+    yPosition: yPosition,
+    randomPosition: false,
+    id: id,
+  });
+  newHighLevel.randomizePosition();
+  newHighLevel.foo();
+  newHighLevel.createBlock();
+  const makeMove = setInterval(() => newHighLevel.move(), 10);
 });
 
 //buttons click handling
@@ -24,17 +47,37 @@ body.addEventListener("click", buttonEvent);
 function buttonEvent(event) {
   const target = event.target.id;
   const backdrop = document.querySelector(".backdrop");
-  console.log(target);
   switch (target) {
     case "simple-cube":
-      renderBox("simple", true);
+      id += 1;
+      const newSimple = new Block({
+        type: "simple",
+        xPosition: xPosition,
+        yPosition: yPosition,
+        id: id,
+        randomPosition: true,
+      });
+      newSimple.randomizePosition();
+      newSimple.foo();
+      newSimple.createBlock();
+      const makeMoveSimpleBlock = setInterval(() => newSimple.move(), 10);
       break;
     case "high-level-cube":
-      renderBox("high-level", true);
+      id += 1;
+      const newHighLevel = new Block({
+        type: "high-level",
+        xPosition: xPosition,
+        yPosition: yPosition,
+        id: id,
+        randomPosition: true,
+      });
+      newHighLevel.randomizePosition();
+      newHighLevel.foo();
+      newHighLevel.createBlock();
+      const makeMoveHighLevelBlock = setInterval(() => newHighLevel.move(), 10);
       break;
     case "about-button":
       backdrop.classList.remove("is-hidden");
-
       break;
   }
   if (event.target === backdrop) {
@@ -42,27 +85,86 @@ function buttonEvent(event) {
   }
 }
 
-//rendering new box
-function renderBox(level, randomPosition) {
-  const color = level === "simple" ? "pink" : "purple";
-  const headerHeight = document.querySelector(".header").offsetHeight;
-  const displayWidth = body.offsetWidth;
-  const canvaWidth = canva.offsetWidth;
-  const canvasHeight = canva.offsetHeight;
-  if (randomPosition) {
-    xPosition = displayWidth / 2 - canvaWidth / 2 + Math.floor(Math.random() * canvaWidth);
-    yPosition = headerHeight + 30 + Math.floor(Math.random() * canvasHeight);
-  }
-  id += 1;
-  const blockY = yPosition - headerHeight - 45;
-  const blockX = xPosition - displayWidth / 2 + canvaWidth / 2 - 25;
-  canva.insertAdjacentHTML(
-    "beforeend",
-    `<div id="${id}" class="simple-block" style="background-color:${color}; top: ${blockY}px; left:${blockX}px"></div>`
-  );
-}
+const headerHeight = document.querySelector(".header").offsetHeight;
+const displayWidth = body.offsetWidth;
+const canvaWidth = canva.offsetWidth;
+const canvasHeight = canva.offsetHeight;
 
-//open modal window with about info
-function aboutModal() {
-  body.innerHTML = ``;
+console.log(canvaWidth);
+class Block {
+  constructor({ type, xPosition, yPosition, id, randomPosition }) {
+    this.type = type;
+    this.xPosition = xPosition;
+    this.yPosition = yPosition;
+    this.id = id;
+    this.randomPosition = randomPosition;
+    this.newX = 0;
+    this.newY = 0;
+    this.xDirection = true;
+    this.yDirection = true;
+  }
+  randomizePosition() {
+    console.log(this.randomPosition);
+
+    if (this.randomPosition === true) {
+      this.newX = Math.floor(Math.random() * canvaWidth - 15);
+      this.newY = Math.floor(Math.random() * canvasHeight - 15);
+    } else if (this.randomPosition === false) {
+      this.newY = this.yPosition - headerHeight - 45;
+      this.newX = this.xPosition - displayWidth / 2 + canvaWidth / 2 - 25;
+    }
+    console.log("x = ", this.newY);
+  }
+
+  foo() {
+    console.log(this);
+    console.log(this.type);
+    console.log(this.xPosition);
+    console.log(this.yPosition);
+    console.log(this.id);
+  }
+  createBlock() {
+    const color = this.type === "simple" ? "pink" : "purple";
+    const newDiv = `<div id="${this.id}" class="simple-block" style="background-color:${color}; top: ${this.newY}px; left:${this.newX}px"></div>`;
+    canva.insertAdjacentHTML(
+      "beforeend",
+      newDiv
+      // `<div id="${id}" class="simple-block" style="background-color:${color}; top: ${this.newY}px; left:${this.newX}px"></div>`
+    );
+    // canva.innerHTML += `<div id="${id}" class="simple-block" style="background-color:${color}; top: ${this.newY}px; left:${this.newX}px"></div>`;
+  }
+  removeBlock() {
+    const removedBlock = document.getElementById(`${this.id}`);
+    canva.removeChild(removedBlock);
+  }
+  move() {
+    this.removeBlock();
+    if (this.xDirection) {
+      this.newX += 1;
+      if (this.newX > canvaWidth - 36) {
+        this.xDirection = !this.xDirection;
+      }
+    }
+    if (!this.xDirection) {
+      this.newX -= 1;
+      if (this.newX < 0) {
+        this.xDirection = !this.xDirection;
+      }
+    }
+
+    if (this.yDirection) {
+      this.newY += 1;
+      if (this.newY > canvasHeight - 36) {
+        this.yDirection = !this.yDirection;
+      }
+    }
+    if (!this.yDirection) {
+      this.newY -= 1;
+      if (this.newY < 0) {
+        this.yDirection = !this.yDirection;
+      }
+    }
+    this.createBlock();
+    console.log("x = ", this.newX, "y = ", this.newY);
+  }
 }

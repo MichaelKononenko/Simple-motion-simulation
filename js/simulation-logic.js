@@ -24,7 +24,6 @@ body.addEventListener("click", buttonEvent);
 function buttonEvent(event) {
   const target = event.target.id;
   const backdrop = document.querySelector(".backdrop");
-  console.log(target);
   switch (target) {
     case "simple-cube":
       renderBox("simple", true);
