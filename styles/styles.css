@@ -53,14 +53,17 @@ body {
   justify-content: space-evenly;
 }
 
-.simple-block {
+.block {
   width: 30px;
   height: 30px;
   position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* canvas center */
-.block {
+.test-block {
   display: none;
   position: absolute;
   top: 50%;

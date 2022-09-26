@@ -102,6 +102,8 @@ class Block {
     this.newY = 0;
     this.xDirection = true;
     this.yDirection = true;
+    this.color = "";
+    this.colorSet = [];
   }
   randomizePosition() {
     console.log(this.randomPosition);
@@ -117,6 +119,12 @@ class Block {
   }
 
   foo() {
+    this.color = this.type === "simple" ? "pink" : "purple";
+    if (this.type === "simple") {
+      this.colorSet = ["pink", "aqua", "orange", "yellow"];
+    } else {
+      this.colorSet = ["purple", "navy", "brown", "teal"];
+    }
     console.log(this);
     console.log(this.type);
     console.log(this.xPosition);
@@ -124,8 +132,8 @@ class Block {
     console.log(this.id);
   }
   createBlock() {
-    const color = this.type === "simple" ? "pink" : "purple";
-    const newDiv = `<div id="${this.id}" class="simple-block" style="background-color:${color}; top: ${this.newY}px; left:${this.newX}px"></div>`;
+    let symbol = this.type === "simple" ? "S" : "H";
+    const newDiv = `<div id="${this.id}" class="block ${this.type}" style="background-color:${this.color}; top: ${this.newY}px; left:${this.newX}px"><span></span>${symbol}</div>`;
     canva.insertAdjacentHTML(
       "beforeend",
       newDiv
@@ -143,12 +151,15 @@ class Block {
       this.newX += 1;
       if (this.newX > canvaWidth - 36) {
         this.xDirection = !this.xDirection;
+        this.color = this.colorSet[0];
       }
     }
     if (!this.xDirection) {
       this.newX -= 1;
       if (this.newX < 0) {
         this.xDirection = !this.xDirection;
+
+        this.color = this.colorSet[1];
       }
     }
 
@@ -156,15 +167,17 @@ class Block {
       this.newY += 1;
       if (this.newY > canvasHeight - 36) {
         this.yDirection = !this.yDirection;
+        this.color = this.colorSet[2];
       }
     }
     if (!this.yDirection) {
       this.newY -= 1;
       if (this.newY < 0) {
         this.yDirection = !this.yDirection;
+        this.color = this.colorSet[3];
       }
     }
     this.createBlock();
-    console.log("x = ", this.newX, "y = ", this.newY);
+    // console.log("x = ", this.newX, "y = ", this.newY);
   }
 }
