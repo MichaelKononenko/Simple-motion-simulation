@@ -1,3 +1,4 @@
+const blocksStorage = [];
 const body = document.querySelector("body");
 
 const canva = document.querySelector(".canvas-area");
@@ -12,6 +13,7 @@ canva.addEventListener(
     yPosition = evt.clientY;
   })
 );
+
 canva.addEventListener("click", () => {
   id += 1;
   const newSimple = new Block({
@@ -21,10 +23,8 @@ canva.addEventListener("click", () => {
     randomPosition: false,
     id: id,
   });
-  newSimple.randomizePosition();
-  newSimple.foo();
-  newSimple.createBlock();
-  newSimple.setTime();
+  blocksStorage.push(newSimple);
+  newSimple.start();
 });
 canva.addEventListener("contextmenu", (event) => {
   event.preventDefault();
@@ -36,10 +36,8 @@ canva.addEventListener("contextmenu", (event) => {
     randomPosition: false,
     id: id,
   });
-  newHighLevel.randomizePosition();
-  newHighLevel.foo();
-  newHighLevel.createBlock();
-  newHighLevel.setTime();
+  blocksStorage.push(newHighLevel);
+  newHighLevel.start();
 });
 
 //buttons click handling
@@ -57,10 +55,8 @@ function buttonEvent(event) {
         id: id,
         randomPosition: true,
       });
-      newSimple.randomizePosition();
-      newSimple.foo();
-      newSimple.createBlock();
-      newSimple.setTime();
+      blocksStorage.push(newSimple);
+      newSimple.start();
       break;
     case "high-level-cube":
       id += 1;
@@ -71,10 +67,8 @@ function buttonEvent(event) {
         id: id,
         randomPosition: true,
       });
-      newHighLevel.randomizePosition();
-      newHighLevel.foo();
-      newHighLevel.createBlock();
-      newHighLevel.setTime();
+      blocksStorage.push(newHighLevel);
+      newHighLevel.start();
       break;
     case "about-button":
       backdrop.classList.remove("is-hidden");
@@ -90,7 +84,6 @@ const displayWidth = body.offsetWidth;
 const canvaWidth = canva.offsetWidth;
 const canvasHeight = canva.offsetHeight;
 
-console.log(canvaWidth);
 class Block {
   constructor({ type, xPosition, yPosition, id, randomPosition }) {
     this.type = type;
@@ -105,11 +98,23 @@ class Block {
     this.color = "";
     this.colorSet = [];
     this.colorId = 0;
+    this.health = 0;
     this.lifes = 0;
     this.makeMove;
   }
+
+  start() {
+    // console.log(blocksStorage);
+    this.randomizePosition();
+    this.chooseLevel();
+    this.createBlock();
+    this.setTime();
+    // setTimeout(this.matchcheck, 200);
+    // this.matchcheck();
+  }
+
   randomizePosition() {
-    console.log(this.randomPosition);
+    // console.log(this.randomPosition);
 
     if (this.randomPosition === true) {
       this.newX = Math.floor(Math.random() * canvaWidth - 15);
@@ -118,32 +123,44 @@ class Block {
       this.newY = this.yPosition - headerHeight - 45;
       this.newX = this.xPosition - displayWidth / 2 + canvaWidth / 2 - 25;
     }
-    console.log("x = ", this.newY);
+    // console.log("x = ", this.newY);
   }
 
-  foo() {
+  chooseLevel() {
     this.color = this.type === "simple" ? "pink" : "indigo";
     if (this.type === "simple") {
-      this.colorSet = ["HotPink", "DeepPink", "MediumVioletRed"];
-      this.lifes = 3;
+      this.colorSet = ["HotPink", "DeepPink", "MediumVioletRed", "purple", "darkOrchid"];
+      this.lifes = 5;
+      this.health = 5;
     } else {
-      this.colorSet = ["purple", "darkOrchid", "blueViolet", "MediumPurple", "orchid", "plum"];
-      this.lifes = 6;
+      this.colorSet = [
+        "purple",
+        "darkOrchid",
+        "blueViolet",
+        "MediumPurple",
+        "orchid",
+        "plum",
+        "HotPink",
+        "DeepPink",
+        "MediumVioletRed",
+      ];
+      this.lifes = 10;
+      this.health = 10;
     }
 
-    console.log(this);
-    console.log(this.type);
-    console.log(this.xPosition);
-    console.log(this.yPosition);
-    console.log(this.id);
+    // console.log(this);
+    // console.log(this.type);
+    // console.log(this.xPosition);
+    // console.log(this.yPosition);
+    // console.log(this.id);
   }
   createBlock() {
-    let symbol = this.type === "simple" ? "S" : "H";
+    // let symbol = this.type === "simple" ? "S" : "H";
     const newDiv = `<div id="${this.id}" class="block ${
       this.type
     }" style="background-image: radial-gradient(${this.color}, ${this.colorSet[this.colorId]}, ${
       this.color
-    }); top: ${this.newY}px; left:${this.newX}px"><span></span>${symbol}</div>`;
+    }); top: ${this.newY}px; left:${this.newX}px"><span>${this.health}</span></div>`;
     canva.insertAdjacentHTML("beforeend", newDiv);
   }
   removeBlock() {
@@ -157,14 +174,16 @@ class Block {
       this.newX += 1;
       if (this.newX > canvaWidth - 36) {
         this.xDirection = !this.xDirection;
-        this.colorId += 1;
+        // this.colorId += 1;
+        this.health += 1;
       }
     }
     if (!this.xDirection) {
       this.newX -= 1;
       if (this.newX < 0) {
         this.xDirection = !this.xDirection;
-        this.colorId += 1;
+        // this.colorId += 1;
+        this.health += 1;
       }
     }
 
@@ -172,29 +191,72 @@ class Block {
       this.newY += 1;
       if (this.newY > canvasHeight - 36) {
         this.yDirection = !this.yDirection;
-        this.colorId += 1;
+        // this.colorId += 1;
+        this.health += 1;
       }
     }
     if (!this.yDirection) {
       this.newY -= 1;
       if (this.newY < 0) {
         this.yDirection = !this.yDirection;
-        this.colorId += 1;
+        // this.colorId += 1;
+        this.health += 1;
       }
     }
+    // if (this.colorId > this.lifes - 1) {
+    //   this.colorId = this.lifes - 1;
+    // }
 
-    if (this.colorId > this.lifes - 1) {
+    if (this.health <= 0) {
       console.log("-1");
       clearInterval(this.makeMove);
+      blocksStorage[this.id - 1] = 0;
+      console.log(blocksStorage);
       return;
     }
 
+    this.colorId = Math.floor(this.health / 5);
+    if (this.colorId >= this.lifes) this.colorId = this.lifes - 1;
     this.createBlock();
-
+    this.matchcheck();
     // console.log("x = ", this.newX, "y = ", this.newY);
   }
 
   setTime() {
     this.makeMove = setInterval(() => this.move(), 25);
+  }
+
+  matchcheck() {
+    const match = blocksStorage.map((item) => {
+      if (item.id === this.id) {
+        return;
+      }
+      if (
+        item.newX + 30 > this.newX &&
+        item.newX - 30 < this.newX &&
+        item.newY + 30 > this.newY &&
+        item.newY - 30 < this.newY
+      ) {
+        if (item.type === "high-level" && this.type === "high-level") {
+          this.health -= 3;
+          item.health -= 3;
+        } else if (item.type === "high-level" && this.type === "simple") {
+          this.health -= 5;
+          item.health -= 1;
+        } else if (item.type === "simple" && this.type === "high-level") {
+          this.health -= 1;
+          item.health -= 5;
+        } else {
+          this.health -= 1;
+          item.health -= 1;
+        }
+        this.xDirection = !this.xDirection;
+        item.xDirection = !item.xDirection;
+        this.yDirection = !this.yDirection;
+        item.yDirection = !item.yDirection;
+
+        return;
+      }
+    });
   }
 }
